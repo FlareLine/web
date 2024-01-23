@@ -1,0 +1,77 @@
+name: 'Check'
+on:
+  pull_request:
+jobs:
+  check:
+    name: 'Check Terraform'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+      - name: terraform fmt
+        id: fmt
+        run: terraform fmt -check
+        continue-on-error: true
+      - name: terraform init
+        id: init
+        run: terraform init
+      - name: terraform validate
+        id: validate
+        run: terraform validate -no-color
+      - name: terraform plan
+        id: plan
+        run: terraform plan -no-color
+      - uses: action/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: 'terraform\n${{ steps.plan.outputs.stdout }}'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' && comment.body.includes('Terraform output')
+            );
+            const output = `
+              **terraform fmt** - \`${{ steps.fmt.outcome }}\`
+              **terraform init** - \`${{ steps.init.outcome }}\`
+              **terraform validate** - \`${{ steps.validate.outcome }}\`
+              **terraform plan** - \`${{ steps.plan.outcome }}\`
+
+              <details><summary>terraform validate</summary>
+
+              \`\`\`\n
+              ${{ steps.validate.outputs.stdout }}
+              \`\`\`
+
+              </details>
+
+              <details><summary>terraform plan</summary>
+
+              \`\`\`\n
+              ${process.env.PLAN}
+              \`\`\`
+
+              </details>
+
+              *Author: @${{ github.actor }}, Action: \`${{ github.event_name }}\``;
+
+              if (botComment) {
+                github.rest.issues.updateComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  comment_id: botComment.id,
+                  body: output,
+                });
+              } else {
+                github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: output
+                });
+              }
