@@ -8,6 +8,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
+      - name: substitute backend endpoint
+        run: sed -i 's/%CLOUDFLARE_BACKEND_ENDPOINT%/${{ secrets.CLOUDFLARE_BACKEND_ENDPOINT }}' backend.conf
       - name: terraform fmt
         id: fmt
         run: terraform fmt -check
@@ -21,6 +23,8 @@ jobs:
       - name: terraform plan
         id: plan
         run: terraform plan -no-color
+        env:
+          TF_VAR_CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       - uses: actions/github-script@v6
         if: github.event_name == 'pull_request'
         env:

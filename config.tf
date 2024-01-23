@@ -6,12 +6,7 @@ terraform {
     }
   }
 
-  backend "s3" {
-    bucket    = "terraform-state"
-    key       = "flareline-web.tfstate"
-    endpoints = { s3 = var.cloudflare_state_endpoint }
-
-  }
+  backend "s3" {}
 }
 
 provider "cloudflare" {
