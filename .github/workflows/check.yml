@@ -9,7 +9,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: hashicorp/setup-terraform@v3
       - name: substitute backend endpoint
-        run: sed -i 's/%CLOUDFLARE_BACKEND_ENDPOINT%/${{ secrets.CLOUDFLARE_BACKEND_ENDPOINT }}' backend.conf
+        run: sed -i 's/%CLOUDFLARE_BACKEND_ENDPOINT%/${{ secrets.CLOUDFLARE_BACKEND_ENDPOINT }}/' backend.conf
       - name: terraform fmt
         id: fmt
         run: terraform fmt -check
