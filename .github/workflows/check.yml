@@ -1,8 +1,8 @@
-name: 'Check'
+name: 'Check Terraform'
 on:
   pull_request:
 jobs:
-  check:
+  check-and-plan:
     name: 'Check Terraform'
     runs-on: ubuntu-latest
     steps:
