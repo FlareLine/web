@@ -17,10 +17,10 @@ jobs:
         id: fmt
         run: terraform fmt -check
         continue-on-error: true
-      - name: terraform init -backend-config="backend.conf"
+      - name: terraform init
         id: init
-        run: terraform init
-      - name: terraform validate -backend-config="backend.conf"
+        run: terraform init -backend-config="backend.conf"
+      - name: terraform validate
         id: validate
         run: terraform validate -no-color -backend-config="backend.conf"
       - name: terraform plan
