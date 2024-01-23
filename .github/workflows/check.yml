@@ -22,7 +22,7 @@ jobs:
         run: terraform init -backend-config="backend.conf"
       - name: terraform validate
         id: validate
-        run: terraform validate -no-color -backend-config="backend.conf"
+        run: terraform validate -no-color
       - name: terraform plan
         id: plan
         run: terraform plan -no-color -backend-config="backend.conf"
